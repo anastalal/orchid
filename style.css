@@ -1,0 +1,13 @@
+*{
+    margin: 0px;
+    padding: auto;
+}
+@font-face {
+    font-family: 'Expo';
+    src: url(assets/fonts/ExpoArabic-Book.ttf);
+}
+body{
+    background: linear-gradient(to right, #fdb99b, #cf8bf3, #a770ef);
+    height: 100vh;
+    font-family: Expo !important;
+}
