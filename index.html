@@ -1,16 +1,175 @@
-<!-- بسم الله الرحمن الرحيم -->
 <!DOCTYPE html>
-<html lang="en">
+<html dir="ltr">
 <head>
-    <meta charset="UTF-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Zara</title>
-    <link rel="stylesheet" href="style.css">
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-GLhlTQ8iRABdZLl6O3oVMWSktQOp6b7In1Zl3/Jr59b6EGGoI1aFkw7cmDA6j6gD" crossorigin="anonymous">
+	<meta charset="utf-8">
+	<title>YCRC</title>
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css" />
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
+	<style>
+		#mapid { height: 400px;   background-color: #fff;}
+        .leaflet-container a{
+            color: #fff;
+        }
+        .info p{
+            font-size: 20px;
+           font-weight: 400;
+        }
+       
+        .info span.value{
+        color: #828282;
+        font-size: 2rem;
+        font-weight: 700;
+      }
+        .info span.number  {
+        background: linear-gradient(117.77deg, #dd1010 55.39%, #828282  50.85%);
+        background-clip: text; 
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        -webkit-background-clip: text; 
+        -webkit-text-fill-color: transparent; 
+        animation: wave 2000ms ease alternate infinite;
+        font-weight: 700;
+        transform: skewX(-10deg); 
+       
+      }
+      .info h2{
+        display: inline-block;
+       position: relative;
+      }
+     .info h2::after{
+        content: "";
+        display: block;
+        position: absolute;
+        bottom: -8px;
+        left: 0;
+        width: 50%;
+        height: 2px;
+        background-color: #dd1010;
+     }
+        .container-div{
+            overflow-x: hidden;
+        }
+	</style>
 </head>
 <body>
-    <h3 class="text-center">بسم الله الرحمن الرحيم</h3>
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js" integrity="sha384-w76AqPfDkMBDXo30jS1Sgez6pr3x5MlQ1ZAGC+nuZB+EYdgRZgiwxhTBTkF7CXvN" crossorigin="anonymous"></script>
+    <div class="container_div flex-diraction-row  mx-auto mt-4 row">
+        <div id="mapid" class="col-md-6"></div>
+    <div class="info  py-4 px-5 d-none col-md-6 mx-auto" id="info">
+        <h2 id="name" class="mb-4">  Aden</h2>
+        <div class="data">
+            <p class=" m-0" id="beneficiaries">2000 Beneficiaries</p>
+            <p class=" m-0" id="branches">2000 Branches</p>
+            <p class=" m-0" id="project">2000 Project</p>
+            <p class=" m-0" id="ambulance">2000 Ambulance</p>
+        </div>
+       
+    </div>
+    </div>
+	<script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
+	<script>
+        var citiesData = [
+            { 
+                name: "Aden",
+                beneficiaries: 4000,
+                branches: 5000,
+                project: 9000,
+                ambulance: 1000
+           },
+           { 
+                name: "Hadramawt",
+                beneficiaries: 7823,
+                branches: 8923,
+                project: 2323,
+                ambulance: 3233
+           },
+           { 
+                name: "Al Mahrah",
+                beneficiaries: 3232,
+                branches: 444,
+                project: 43,
+                ambulance: 434
+           },
+           { 
+                name: "Al Jawf",
+                beneficiaries: 434,
+                branches: 4433,
+                project: 344,
+                ambulance: 2000
+           },
+           { 
+                name: "Shabwah",
+                beneficiaries: 983,
+                branches: 3434,
+                project: 3434,
+                ambulance: 3444
+           },
+          ];
+		var mymap = L.map('mapid').setView([51.505, -0.09], 9);
+		info = document.getElementById('info');
+		// Load the GeoJSON data using AJAX
+		var url = "./map.geojson";
+		var dataLayer = null;
+        var infoName = document.getElementById('name');
+        var infoBeneficiaries = document.getElementById('beneficiaries');
+        var infoBranches = document.getElementById('branches');
+        var infoProject = document.getElementById('project');
+        var infoAmbulance =document.getElementById('ambulance');
+		var ajax = new XMLHttpRequest();
+		ajax.open("GET", url);
+		ajax.onreadystatechange = function() {
+			if (this.readyState === 4 && this.status === 200) {
+                dataLayer = L.geoJSON(JSON.parse(this.responseText), {
+                style: {
+                    color: "#828282",
+                    weight: 1,
+                    fillColor: "#fff"
+                },
+               
+                onEachFeature: function(feature, layer) {
+                        layer.on('mouseover', function() {
+                        var cityData = citiesData.find(function(city) {
+                            return city.name === feature.properties.NAME_1;
+                        });
+                        if (cityData) {
+                            infoName.innerHTML = cityData.name;
+                         infoBeneficiaries.innerHTML = "<span class='value'> <span class='number'>" + cityData.beneficiaries.toString()[0] + "</span>" + cityData.beneficiaries.toString().slice(1) + "</span>  Beneficiaries";
+                            infoBranches.innerHTML = "<span class='value'> <span class='number'>"+ cityData.branches.toString()[0] + "</span>" + cityData.branches.toString().slice(1) + "</span> Branches";
+                            infoProject.innerHTML =  "<span class='value'> <span class='number'>" + cityData.project.toString()[0] + "</span>" + cityData.project.toString().slice(1) + "</span> Project";
+                            infoAmbulance.innerHTML = "<span class='value'> <span class='number'>" + cityData.ambulance.toString()[0] + "</span>" + cityData.ambulance.toString().slice(1) + "</span> Ambulance";
+                            info.classList.remove('d-none');
+                        }
+                        else{
+                          infoName.innerHTML = feature.properties.NAME_1;;
+                         infoBeneficiaries.innerHTML = "<span class='value'> <span class='number'>" + 0 + "</span>" + 0 + "</span>  Beneficiaries";
+                            infoBranches.innerHTML = "<span class='value'> <span class='number'>"+ 0 + "</span>" + 0 + "</span> Branches";
+                            infoProject.innerHTML =  "<span class='value'> <span class='number'>" + 0 + "</span>" + 0 + "</span> Project";
+                            infoAmbulance.innerHTML = "<span class='value'> <span class='number'>" + 0 + "</span>" + 0+ "</span> Ambulance";
+                            info.classList.remove('d-none');
+                        }
+                         layer.setStyle({
+                            fillOpacity: 1,
+                            color: "",
+                            fillColor: "#dd1010"
+                        });
+                     });
+                     layer.on('mouseout', function() {
+                        info.classList.add('d-none');
+                         layer.setStyle({
+                            color: "#828282",
+                            weight: 1,
+                            fillColor: "#fff"
+                        });
+                     });
+					}
+            }).addTo(mymap);
+				// Fit the map bounds to the GeoJSON data
+				mymap.fitBounds(dataLayer.getBounds());
+                mymap.removeControl(mymap.zoomControl);
+				mymap.setZoom(mymap.getZoom() );
+			}
+		};
+		ajax.send();
+	</script>
 </body>
 </html>
